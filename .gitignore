@@ -25,6 +25,5 @@ yarn-error.log*
 valid_words.txt
 word_opts.txt
 valid_words_list.json
-words_list.json
 
 .notes

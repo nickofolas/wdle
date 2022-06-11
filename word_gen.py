@@ -10,7 +10,7 @@ dest = "src/data/words_list.json" if len(sys.argv) == 1 \
 with open(source, "r") as file:
     words.extend(filter(lambda word: len(word) == 5, file.read().splitlines()))
 
-with open(dest, "x") as target_file:
+with open(dest, "w") as target_file:
     data = json.dumps(words)
     target_file.write(data)
 
