@@ -1,7 +1,8 @@
-import "./App.css";
+import "./wdle.css";
 import React, { useRef, useEffect, useState } from "react";
 import wordData from "./data/words_list.json";
 import validWords from "./data/valid_words_list.json";
+import { OnScreenKeyboard } from "./keyboard";
 
 // Taken from stackoverflow
 function useEventListener(eventName, handler, element = window) {
@@ -34,17 +35,17 @@ function WdleRow({ rowData, setRowData, word, idx, activeIdx, setActiveIdx }) {
     // The main className, depending on whether the row is active or not
     mainClassName = "wdleRow " + (active ? "rowActive" : "");
 
-  function handler({ key, keyCode }) {
+  function handler({ key }) {
     let newGuess = rowData[idx].guess;
 
-    if (keyCode === 8) {
+    if (key === "Backspace") {
       // If backspace was pressed, remove the last character
       newGuess = newGuess.slice(0, rowData[idx].guess.length - 1);
-    } else if (keyCode >= 65 && keyCode <= 90) {
+    } else if (/^[A-Za-z]$/gi.test(key)) {
       // If the keycode is alpha, add the character
       newGuess = (rowData[idx].guess + key).toLowerCase();
     } else if (
-      keyCode === 13 &&
+      key === "Enter" &&
       rowData[idx].guess.length === 5 &&
       validWords.includes(newGuess.toLowerCase())
     ) {
@@ -128,7 +129,7 @@ function WdleRow({ rowData, setRowData, word, idx, activeIdx, setActiveIdx }) {
   return <div className={mainClassName}>{Object.values(uiEntries)}</div>;
 }
 
-function App() {
+function WdleRoot() {
   const [word, setWord] = useState("");
   const [usedChars, setUsedChars] = useState(new Set([]));
 
@@ -144,10 +145,6 @@ function App() {
     )
   );
   const [active, setActive] = useState(0);
-
-  function isCompleted() {
-    return active === -1 || active >= numRows;
-  }
 
   // Generate {numRows} rows
   const rows = [];
@@ -180,56 +177,48 @@ function App() {
     }
   }, [rowData, active, word, usedChars]);
 
+  const guesses = Object.values(rowData)
+    .map((row) => row.guess)
+    .filter((guess) => guess.length === 5);
+
+  // Check if the player has failed to guess the word
+  // (the number of active >= max number of rows and no guesses match the word)
+  function isFailed() {
+    return active >= numRows && !guesses.some((guess) => guess === word);
+  }
+
+  // Check if the game has concluded
+  function isCompleted() {
+    return active === -1 || isFailed();
+  }
+
   return (
-    <div id="wdleRoot">
+    <>
       <div id="wdleTitle">
-        <h1>wdle v3.0</h1>
-        <p>like wordle, but bad</p>
+        <h1>wdle 4.0</h1>
+        <p>"like wordle, but worse"</p>
       </div>
 
       <div className={"wdleGameRoot" + (isCompleted() ? " completed" : "")}>
         <div className="wdleGridRoot">{rows}</div>
       </div>
 
-      <div className="wdleUsedCharList">
-        {[...usedChars.values()]
-          .sort((a, b) => a.localeCompare(b))
-          .map((char, charIndex) => (
-            <p
-              key={`${char}-${charIndex}`}
-              className={(() => {
-                if (word.includes(char)) {
-                  if (
-                    Object.values(rowData)
-                      .slice(0, active)
-                      .some(
-                        ({ guess }) =>
-                          guess.indexOf(char) === word.indexOf(char)
-                      )
-                  ) {
-                    return "wdleGuessGood";
-                  } else {
-                    return "wdleGuessClose";
-                  }
-                } else {
-                  return "wdleGuessBad";
-                }
-              })()}
-            >
-              {char.toUpperCase()}
-            </p>
-          ))}
-      </div>
-
       {isCompleted() && (
         <div className="wdleRootCompletionModal">
           {active === -1 && (
-            <h1 className="wdleRootSuccess">congrats you did it</h1>
-          )}
-          {active >= numRows && (
             <>
-              <h1 className="wdleRootFailure">oops you failed</h1>
-              <p>the word was {word}</p>
+              <h1 className="wdleRootSuccess">You got it!</h1>
+              <p>You used {guesses.length} turn(s)</p>
+            </>
+          )}
+          {isFailed() && (
+            <>
+              <h1 className="wdleRootFailure">
+                Better luck next time? ¯\_(ツ)_/¯
+              </h1>
+              <p>
+                The correct word was <code>{word}</code>
+              </p>
             </>
           )}
           <div
@@ -239,12 +228,20 @@ function App() {
               return false;
             }}
           >
-            play again
+            Play Again
           </div>
         </div>
       )}
-    </div>
+
+      <OnScreenKeyboard
+        usedChars={usedChars}
+        word={word}
+        submittedGuesses={Object.values(rowData)
+          .slice(0, active === -1 ? rowData.length : active)
+          .map((row) => row.guess)}
+      />
+    </>
   );
 }
 
-export default App;
+export default WdleRoot;

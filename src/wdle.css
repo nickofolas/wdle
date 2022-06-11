@@ -1,0 +1,171 @@
+/* Root setup */
+#wdleRoot {
+  background-color: black;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+
+  min-height: 100vh;
+}
+
+/* Title base styles */
+#wdleTitle {
+  height: fit-content;
+  text-align: center;
+  color: white;
+}
+
+/* Title text children need no margin, otherwise a bunch of space is wasted */
+#wdleTitle > h1 {
+  font-size: 150%;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+#wdleTitle > p {
+  font-size: 100%;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* If the screen is over 900px, show full size title */
+@media screen and (min-height: 900px) {
+  #wdleTitle > h1 {
+    font-size: 500%;
+  }
+
+  #wdleTitle > p {
+    font-size: 30px;
+  }
+}
+
+/* Base grid styles */
+.wdleGameRoot {
+  background-color: black;
+
+  display: grid;
+  align-items: center;
+  justify-content: center;
+
+  width: 50%;
+}
+
+/* Set opacity of everything behind completion modal to 70% */
+.wdleGameRoot.completed {
+  opacity: 70%;
+}
+
+/* Modal styling */
+.wdleRootCompletionModal {
+  position: absolute;
+
+  background-color: black;
+  border: 1px solid white;
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+
+  width: fit-content;
+  height: fit-content;
+  padding: 10px;
+}
+
+.wdleRootCompletionModal > h1 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+/* Base styling for fake buttons */
+.button {
+  color: white;
+  background-color: grey;
+  text-align: center;
+  padding: 3px;
+}
+
+/* Button hover styling */
+.button:hover {
+  cursor: pointer;
+  background-color: rgb(158, 158, 158);
+}
+
+/* When the modal is for success, color header to green */
+h1.wdleRootSuccess {
+  color: green;
+}
+
+/* Otherwise, color header red */
+h1.wdleRootFailure {
+  color: red;
+}
+
+/* Game grid styles */
+.wdleGridRoot {
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 8px;
+}
+
+/* Game row styles */
+.wdleRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+/* Base guess stles */
+.baseGuess {
+  background-color: rgb(102, 102, 102);
+  color: white;
+  border: 1px solid black;
+
+  font-weight: bolder;
+  font-size: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: calc(15vw);
+  width: calc(15vw);
+}
+
+/* If the screen is >= 500px width, lock the grid cells to 75x75px */
+@media screen and (min-width: 500px) {
+  .baseGuess {
+    height: 75px;
+    width: 75px;
+  }
+}
+
+/* Color for active row */
+.rowActive > .baseGuess {
+  background-color: #8d8d8d;
+}
+
+/* Common style for successful guesses */
+.wdleGuessGood {
+  background-color: green;
+}
+
+/* Common style for unsuccessful guesses */
+.wdleGuessBad {
+  background-color: rgb(85, 85, 85);
+}
+
+/* Common style for "close" guesses */
+.wdleGuessClose {
+  background-color: orange;
+}
