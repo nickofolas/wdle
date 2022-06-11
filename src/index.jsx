@@ -4,9 +4,7 @@ import "./index.css";
 import WdleRoot from "./wdle";
 
 // #wdleRoot will always exist, so the assertion is valid
-const root = ReactDOM.createRoot(
-  document.getElementById("wdleRoot") as HTMLElement
-);
+const root = ReactDOM.createRoot(document.getElementById("wdleRoot"));
 root.render(
   <React.StrictMode>
     <WdleRoot />

@@ -31,24 +31,27 @@ const QWERTY_KEYS = [
   "M",
 ];
 
-interface KeyParams {
-  keyName: string;
-  special?: boolean;
-  labelOverride?: string;
+/**
+ * @typedef {Object} KeyboardDataParams
+ * @property {Set<string>} usedChars
+ * @property {string} word
+ * @property {string[]} submittedGuesses
+ * @property {boolean} done
 
-  data?: Partial<KeyboardDataParams>;
-}
+ * @typedef {Object} KeyParams
+ * @property {string} keyName
+ * @property {boolean} [special]
+ * @property {string} [labelOverride]
+ * @property {KeyboardDataParams} [data]
+ */
 
+/** @param {KeyParams} */
 export function TouchKey({
   keyName,
   special = false,
   labelOverride = undefined,
-  data: {
-    usedChars = new Set<string>(),
-    word = "",
-    submittedGuesses = [],
-  } = {},
-}: KeyParams) {
+  data: { usedChars = new Set(), word = "", submittedGuesses = [] } = {},
+}) {
   let className = special ? "specialKey" : "";
 
   const char = keyName.toLowerCase();
@@ -105,37 +108,26 @@ export function TouchKey({
   );
 }
 
-interface KeyboardDataParams {
-  usedChars: Set<string>;
-  word: string;
-  submittedGuesses: string[];
-  done: boolean;
-}
-
-export function OnScreenKeyboard({
-  usedChars,
-  word,
-  submittedGuesses,
-  done,
-}: KeyboardDataParams) {
+/** @param {KeyboardDataParams} */
+export function OnScreenKeyboard({ usedChars, word, submittedGuesses, done }) {
   const data = { usedChars, word, submittedGuesses };
 
   return (
     <div id="keyboardRoot" className={done ? "completed" : ""}>
       <div className="keyRow">
-        {QWERTY_KEYS.slice(0, 10).map((key) => (
-          <TouchKey keyName={key} data={data} />
+        {QWERTY_KEYS.slice(0, 10).map((key, i) => (
+          <TouchKey keyName={key} key={`${i}-${key}`} data={data} />
         ))}
       </div>
       <div className="keyRow">
-        {QWERTY_KEYS.slice(10, 19).map((key) => (
-          <TouchKey keyName={key} data={data} />
+        {QWERTY_KEYS.slice(10, 19).map((key, i) => (
+          <TouchKey keyName={key} key={`${i}-${key}`} data={data} />
         ))}
       </div>
       <div className="keyRow">
         <TouchKey keyName={"Enter"} special />
-        {QWERTY_KEYS.slice(19, 26).map((key) => (
-          <TouchKey keyName={key} data={data} />
+        {QWERTY_KEYS.slice(19, 26).map((key, i) => (
+          <TouchKey keyName={key} key={`${i}-${key}`} data={data} />
         ))}
         <TouchKey labelOverride="⌫" keyName={"Backspace"} special />
       </div>
