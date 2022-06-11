@@ -1,7 +1,9 @@
+:root {
+  background-color: black;
+}
+
 /* Root setup */
 #wdleRoot {
-  background-color: black;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -9,6 +11,13 @@
   gap: 20px;
 
   min-height: 100vh;
+}
+
+/* Hack for iOS Safari, which otherwise occludes some of the display with the footer */
+@supports (-webkit-touch-callout: none) {
+  #wdleRoot {
+    min-height: -webkit-fill-available;
+  }
 }
 
 /* Title base styles */
@@ -138,8 +147,8 @@ h1.wdleRootFailure {
   align-items: center;
   justify-content: center;
 
-  height: calc(15vw);
-  width: calc(15vw);
+  height: calc(12.5vw);
+  width: calc(12.5vw);
 }
 
 /* If the screen is >= 500px width, lock the grid cells to 75x75px */
