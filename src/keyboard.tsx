@@ -31,12 +31,24 @@ const QWERTY_KEYS = [
   "M",
 ];
 
+interface KeyParams {
+  keyName: string;
+  special?: boolean;
+  labelOverride?: string;
+
+  data?: Partial<KeyboardDataParams>;
+}
+
 export function TouchKey({
   keyName,
   special = false,
-  labelOverride = null,
-  data: { usedChars = new Set(), word = "", submittedGuesses = [] } = {},
-}) {
+  labelOverride = undefined,
+  data: {
+    usedChars = new Set<string>(),
+    word = "",
+    submittedGuesses = [],
+  } = {},
+}: KeyParams) {
   let className = special ? "specialKey" : "";
 
   const char = keyName.toLowerCase();
@@ -45,12 +57,17 @@ export function TouchKey({
   if (usedChars.has(char)) {
     // If the character is in the word
     if (word.includes(char)) {
-      // If it exactly matches the character in the word by position,
-      if (
-        submittedGuesses.some(
-          (guess) => guess.indexOf(char) === word.indexOf(char)
+      // A set of all characters which match exactly
+      const exactMatches = new Set(
+        submittedGuesses.flatMap((guess) =>
+          [...guess].filter(
+            (guessChar, idx) => guess[idx] === word[idx] && guessChar
+          )
         )
-      ) {
+      );
+
+      // If the character is in the set of exact matches,
+      if (exactMatches.has(char)) {
         // Give it the green background color
         className += " wdleGuessGood";
       } else {
@@ -88,12 +105,23 @@ export function TouchKey({
   );
 }
 
-// data = { usedChars, word, submittedGuesses }
-export function OnScreenKeyboard({ usedChars, word, submittedGuesses }) {
+interface KeyboardDataParams {
+  usedChars: Set<string>;
+  word: string;
+  submittedGuesses: string[];
+  done: boolean;
+}
+
+export function OnScreenKeyboard({
+  usedChars,
+  word,
+  submittedGuesses,
+  done,
+}: KeyboardDataParams) {
   const data = { usedChars, word, submittedGuesses };
 
   return (
-    <div id="keyboardRoot">
+    <div id="keyboardRoot" className={done ? "completed" : ""}>
       <div className="keyRow">
         {QWERTY_KEYS.slice(0, 10).map((key) => (
           <TouchKey keyName={key} data={data} />

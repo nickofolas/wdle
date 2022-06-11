@@ -63,7 +63,7 @@
 }
 
 /* Set opacity of everything behind completion modal to 70% */
-.wdleGameRoot.completed {
+.completed {
   opacity: 70%;
 }
 

@@ -3,10 +3,15 @@ import React, { useRef, useEffect, useState } from "react";
 import wordData from "./data/words_list.json";
 import validWords from "./data/valid_words_list.json";
 import { OnScreenKeyboard } from "./keyboard";
+import { PropertyOf } from "./types";
 
 // Taken from stackoverflow
-function useEventListener(eventName, handler, element = window) {
-  const savedHandler = useRef();
+function useEventListener(
+  eventName: string,
+  handler: (event: Event) => void,
+  element = window
+) {
+  const savedHandler = useRef<(event: Event) => void>();
 
   useEffect(() => {
     savedHandler.current = handler;
@@ -16,7 +21,10 @@ function useEventListener(eventName, handler, element = window) {
     const isSupported = element && element.addEventListener;
     if (!isSupported) return;
 
-    const eventListener = (event) => savedHandler.current(event);
+    const eventListener = (event: Event) =>
+      (savedHandler as React.MutableRefObject<(event: Event) => void>).current(
+        event
+      );
 
     element.addEventListener(eventName, eventListener);
 
@@ -26,7 +34,23 @@ function useEventListener(eventName, handler, element = window) {
   }, [eventName, element]);
 }
 
-function WdleRow({ rowData, setRowData, word, idx, activeIdx, setActiveIdx }) {
+interface RowParams {
+  rowData: RowData;
+  setRowData: React.Dispatch<React.SetStateAction<RowData>>;
+  word: string;
+  idx: number;
+  activeIdx: number;
+  setActiveIdx: React.Dispatch<React.SetStateAction<number>>;
+}
+
+function WdleRow({
+  rowData,
+  setRowData,
+  word,
+  idx,
+  activeIdx,
+  setActiveIdx,
+}: RowParams): React.ReactElement {
   // If this is the currently active row
   const active = activeIdx === idx,
     // If the outcome should be displayed
@@ -35,7 +59,7 @@ function WdleRow({ rowData, setRowData, word, idx, activeIdx, setActiveIdx }) {
     // The main className, depending on whether the row is active or not
     mainClassName = "wdleRow " + (active ? "rowActive" : "");
 
-  function handler({ key }) {
+  function handler({ key }: KeyboardEvent): void {
     let newGuess = rowData[idx].guess;
 
     if (key === "Backspace") {
@@ -59,7 +83,7 @@ function WdleRow({ rowData, setRowData, word, idx, activeIdx, setActiveIdx }) {
     }
   }
 
-  useEventListener("keydown", handler);
+  useEventListener("keydown", handler as unknown as (event: Event) => void);
 
   // It's been modified by now so we can just assign to it
   const guess = rowData[idx].guess;
@@ -88,7 +112,7 @@ function WdleRow({ rowData, setRowData, word, idx, activeIdx, setActiveIdx }) {
     // First we need to pass over only the successful guesses
     // so that they can be shown in green without worrying about ordering
     for (const [char, charIndex] of [...word]
-      .map((c, i) => [c, i])
+      .map((c, i): [string, number] => [c, i])
       .filter((_, i) => word.charAt(i) === guess.charAt(i))) {
       uiEntries[charIndex] = (
         <div key={`${char}-${charIndex}`} className={`baseGuess wdleGuessGood`}>
@@ -129,9 +153,13 @@ function WdleRow({ rowData, setRowData, word, idx, activeIdx, setActiveIdx }) {
   return <div className={mainClassName}>{Object.values(uiEntries)}</div>;
 }
 
+interface RowData {
+  [key: number]: { guess: string };
+}
+
 function WdleRoot() {
   const [word, setWord] = useState("");
-  const [usedChars, setUsedChars] = useState(new Set([]));
+  const [usedChars, setUsedChars] = useState<Set<string>>(new Set([]));
 
   // Initalize the word once
   useEffect(() => {
@@ -139,7 +167,7 @@ function WdleRoot() {
   }, []);
 
   const numRows = 6;
-  const [rowData, setRowData] = useState(
+  const [rowData, setRowData] = useState<RowData>(
     Object.fromEntries(
       [...Array(numRows).keys()].map((k) => [k, { guess: "" }])
     )
@@ -147,7 +175,7 @@ function WdleRoot() {
   const [active, setActive] = useState(0);
 
   // Generate {numRows} rows
-  const rows = [];
+  const rows: React.ReactElement[] = [];
   for (let i = 0; i < numRows; i++) {
     rows.push(
       <WdleRow
@@ -237,8 +265,9 @@ function WdleRoot() {
         usedChars={usedChars}
         word={word}
         submittedGuesses={Object.values(rowData)
-          .slice(0, active === -1 ? rowData.length : active)
-          .map((row) => row.guess)}
+          .slice(0, active === -1 ? Object.keys(rowData).length : active)
+          .map((row: PropertyOf<RowData>) => row.guess)}
+        done={isCompleted()}
       />
     </>
   );
