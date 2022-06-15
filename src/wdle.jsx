@@ -168,10 +168,12 @@ function WdleRoot() {
     /** @type {Set<string>} */ (new Set([]))
   );
 
-  // Initalize the word once
+  const [resetVar, setReset] = useState(false);
+
+  // Initalize the word
   useEffect(() => {
     setWord(wordData[Math.floor(Math.random() * wordData.length)]);
-  }, []);
+  }, [resetVar]);
 
   const numRows = 6;
   const [rowData, setRowData] = useState(
@@ -182,6 +184,22 @@ function WdleRoot() {
     )
   );
   const [active, setActive] = useState(0);
+
+  // Reset the game to a cleared state to replay
+  const reset = () => {
+    // Reset used chars
+    setUsedChars(new Set([]));
+    // Reset active row
+    setActive(0);
+    // Reset row data
+    setRowData(
+      Object.fromEntries(
+        [...Array(numRows).keys()].map((k) => [k, { guess: "" }])
+      )
+    );
+    // Trigger word reset
+    setReset(!resetVar);
+  };
 
   // Generate {numRows} rows
   /** @type {React.ReactElement[]} */
@@ -233,7 +251,7 @@ function WdleRoot() {
   return (
     <>
       <div id="wdleTitle">
-        <h1>wdle 5.0</h1>
+        <h1>wdle 6.0</h1>
         <p>"like wordle, but worse"</p>
       </div>
 
@@ -262,7 +280,7 @@ function WdleRoot() {
           <div
             className="button"
             onClick={() => {
-              window.location.reload();
+              reset();
               return false;
             }}
           >
